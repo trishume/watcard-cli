@@ -25,5 +25,8 @@ when "ledger"
   days_ago = (ARGV.shift || 0).to_i
   hist.output_ledger(days_ago)
 else
+  puts "Watcard CLI v#{Watcard::VERSION}"
+  puts "By Tristan Hume"
+  puts ""
   puts "Unknown command"
 end
