@@ -27,6 +27,8 @@ accounts:
   4: ["Expenses:Misc University","Assets:WatCard:Flex"]
 ```
 
+*Note: you can find the web UI for setting your pin and online access [here](https://account.watcard.uwaterloo.ca/).*
+
 ## Usage
 
 ### History
