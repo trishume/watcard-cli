@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+
+require "watcard"
+require "yaml"
+
+FILE = File.expand_path("~/.watcard.yml")
+
+begin
+  yaml_dat = IO.read(FILE)
+  conf = YAML.load(yaml_dat)
+rescue Exception => e
+  STDERR.puts "Can't load config file"
+  p e
+  STDERR.puts e.message
+end
+
+command = ARGV.shift
+case command
+when "hist"
+  hist = Watcard::History.new(conf)
+  days_ago = (ARGV.shift || 0).to_i
+  hist.output_history(days_ago)
+when "ledger"
+  hist = Watcard::History.new(conf)
+  days_ago = (ARGV.shift || 0).to_i
+  hist.output_ledger(days_ago)
+else
+  puts "Unknown command"
+end
