@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["tris.hume@gmail.com"]
   spec.summary       = %q{Command line interface for University of Waterloo WatCard}
   spec.description   = %q{Command line interface for University of Waterloo WatCard. Includes commands to see purchase history and output ledger.}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/trishume/watcard-cli"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
