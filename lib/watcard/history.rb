@@ -35,7 +35,8 @@ module Watcard
     def parse_loc(loc)
       return "V1 Cafeteria" if loc =~ /WAT-FS-V1/
       return "Liquid Assets" if loc =~ /WAT-FS-LA/
-      "Campus"
+      return "V1 Laundry" if loc =~ /V1 LAUNDRY/
+      loc
     end
 
     def history(date)
@@ -59,7 +60,9 @@ module Watcard
       return hist if hist.empty?
       hist.each do |a|
         h = a[:time].hour
-        type = if h < 12
+        type = if a[:loc] =~ /laundry/i
+          "Laundry"
+        elsif h < 11
           "Breakfast"
         elsif h < 17
           "Lunch"
@@ -126,7 +129,7 @@ END
       meals = fetch_meals(days_ago)
       total = 0
       meals.each do |m|
-        total += m[:amount]
+        total += m[:amount] if m[:balance] == 1
         puts "#{m[:meal]}: $#{sprintf('%.2f', m[:amount])} @ #{m[:loc]}"
       end
       budget = @conf['budget']
