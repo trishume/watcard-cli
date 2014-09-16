@@ -3,6 +3,7 @@ require "net/http"
 require "uri"
 require "time"
 require "facets"
+require "yaml"
 
 module Watcard
   class History
@@ -36,6 +37,7 @@ module Watcard
       return "V1 Cafeteria" if loc =~ /WAT-FS-V1/
       return "Liquid Assets" if loc =~ /WAT-FS-LA/
       return "V1 Laundry" if loc =~ /V1 LAUNDRY/
+      return "Media.Doc" if loc =~ /MEDIA.DOC/
       loc
     end
 
@@ -51,17 +53,19 @@ module Watcard
           time: Time.parse(cols[1], date),
           amount: -(cols[2].strip.to_f)*mult,
           loc: parse_loc(cols.last),
+          raw_loc: cols.last,
           balance: cols[3].to_i
         }
       end.compact.reverse
     end
 
-    def bundle_transactions(hist)
-      return hist if hist.empty?
+    def add_transaction_types(hist)
       hist.each do |a|
         h = a[:time].hour
         type = if a[:loc] =~ /laundry/i
           "Laundry"
+        elsif a[:loc] =~ /media/i
+          "Printing"
         elsif h < 11
           "Breakfast"
         elsif h < 17
@@ -71,6 +75,10 @@ module Watcard
         end
         a[:meal] = type
       end
+    end
+
+    def bundle_transactions(hist)
+      return hist if hist.empty?
       meals = [hist.shift]
       hist.each do |a|
         # if last meal is same type treat them as one
@@ -96,6 +104,7 @@ module Watcard
         log "No Transactions"
         exit
       end
+      add_transaction_types(hist)
       bundle_transactions(hist)
     end
 
@@ -109,11 +118,7 @@ module Watcard
 END
     end
 
-    def output_ledger(days_ago)
-      meals = fetch_meals(days_ago)
-      add_accounts(meals)
-      log "# Transactions:"
-      out = meals.map {|m| ledger_transaction(m)}.join('')
+    def ledger_append_prompt(out)
       puts out
       if STDIN.tty? && @conf['ledger']
         print "# Add to file [yN]: "
@@ -123,6 +128,29 @@ END
         File.open(file, 'a') {|f| f.puts out}
         puts "# Added to #{file}"
       end
+    end
+
+    def ledger_transactions(days_ago)
+      meals = fetch_meals(days_ago)
+      add_accounts(meals)
+      meals.map {|m| ledger_transaction(m)}.join('')
+    end
+
+    def output_ledger(days_ago)
+      log "# Transactions for #{days_ago} days ago"
+      out = ledger_transactions(days_ago)
+      ledger_append_prompt(out)
+    end
+
+    def output_ledger_all
+      start = (Date.today - last_ledger_add).to_i - 1
+      days = []
+      start.downto(0).each do |days_ago|
+        days << ledger_transactions(days_ago)
+      end
+      out = days.join('')
+      log "# Transactions since #{start} days ago:"
+      ledger_append_prompt(out)
     end
 
     def output_history(days_ago)
@@ -136,6 +164,19 @@ END
       print "= $#{total}"
       print " out of $#{budget} surplus: #{sprintf('%.2f',budget-total)}" if budget
       puts ''
+    end
+
+    def output_raw_history(days_ago)
+      hist = history(Time.now.less(days_ago, :days))
+      add_transaction_types(hist)
+      puts YAML.dump(hist)
+    end
+
+    def last_ledger_add
+      return Date.today unless @conf['ledger']
+      file = File.expand_path(@conf['ledger'])
+      ledger = IO.read(file)
+      Date.parse(ledger.scan(/\d+\/\d+\/\d+/).last)
     end
   end
 end

@@ -15,15 +15,20 @@ rescue Exception => e
 end
 
 command = ARGV.shift
+days_ago = (ARGV.shift || 0).to_i
+hist = Watcard::History.new(conf)
 case command
 when "hist"
-  hist = Watcard::History.new(conf)
-  days_ago = (ARGV.shift || 0).to_i
   hist.output_history(days_ago)
 when "ledger"
-  hist = Watcard::History.new(conf)
-  days_ago = (ARGV.shift || 0).to_i
   hist.output_ledger(days_ago)
+when "ledgerall"
+  hist.output_ledger_all
+when "rawhist"
+  hist.output_raw_history(days_ago)
+when "lastadd"
+  date = hist.last_ledger_add
+  puts "#{(Date.today-date).to_i} days ago on #{date}"
 else
   puts "Watcard CLI v#{Watcard::VERSION}"
   puts "By Tristan Hume"
