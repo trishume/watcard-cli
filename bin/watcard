@@ -3,6 +3,19 @@
 require "watcard"
 require "yaml"
 
+MSG = <<END
+Watcard CLI v#{Watcard::VERSION}
+By Tristan Hume (http://thume.ca/)
+
+# Commands:
+hist [days ago]: Output meals for day
+ledger [days ago]: Output ledger for day and optionally send to file.
+ledgerall [days ago]: Like ledger but for all days since last add.
+rawhist [days ago]: Output YAML transaction data for day, no bundling
+lastadd: Output date history was added to ledger
+
+END
+
 FILE = File.expand_path("~/.watcard.yml")
 
 begin
@@ -30,8 +43,5 @@ when "lastadd"
   date = hist.last_ledger_add
   puts "#{(Date.today-date).to_i} days ago on #{date}"
 else
-  puts "Watcard CLI v#{Watcard::VERSION}"
-  puts "By Tristan Hume"
-  puts ""
-  puts "Unknown command"
+  puts MSG
 end
