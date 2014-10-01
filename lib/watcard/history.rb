@@ -37,8 +37,9 @@ module Watcard
       return "V1 Cafeteria" if loc =~ /WAT-FS-V1/
       return "Liquid Assets" if loc =~ /WAT-FS-LA/
       return "V1 Laundry" if loc =~ /V1 LAUNDRY/
+      return "V1 Front Desk" if loc =~ /V1DESK/
       return "Media.Doc" if loc =~ /MEDIA.DOC/
-      loc
+      loc.strip
     end
 
     def history(date)
@@ -64,7 +65,7 @@ module Watcard
         h = a[:time].hour
         type = if a[:loc] =~ /laundry/i
           "Laundry"
-        elsif a[:loc] =~ /media/i
+        elsif a[:loc] =~ /media|desk/i
           "Printing"
         elsif h < 11
           "Breakfast"
