@@ -104,10 +104,7 @@ module Watcard
 
     def fetch_meals(days_ago)
       hist = history(Time.now.less(days_ago, :days))
-      if hist.empty?
-        log "No Transactions"
-        exit
-      end
+      return hist if hist.empty?
       add_transaction_types(hist)
       bundle_transactions(hist)
     end
@@ -148,6 +145,7 @@ END
 
     def output_ledger_all
       start = (Date.today - last_ledger_add).to_i - 1
+      puts "# Fetching transactions since #{start} days ago"
       days = []
       start.downto(0).each do |days_ago|
         days << ledger_transactions(days_ago)
@@ -159,6 +157,7 @@ END
 
     def output_history(days_ago)
       meals = fetch_meals(days_ago)
+      puts "No Transactions" if meals.empty?
       total = 0
       meals.each do |m|
         total += m[:amount] if m[:balance] == 1
