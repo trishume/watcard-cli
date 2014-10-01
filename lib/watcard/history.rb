@@ -39,6 +39,7 @@ module Watcard
       return "V1 Laundry" if loc =~ /V1 LAUNDRY/
       return "V1 Front Desk" if loc =~ /V1DESK/
       return "Media.Doc" if loc =~ /MEDIA.DOC/
+      return "Student Health Pharmacy" if loc =~ /STUDENT HEALTH/
       loc.strip
     end
 
@@ -67,6 +68,8 @@ module Watcard
           "Laundry"
         elsif a[:loc] =~ /media|desk/i
           "Printing"
+        elsif a[:loc] =~ /pharmacy/i
+          "Health Supplies"
         elsif h < 11
           "Breakfast"
         elsif h < 17
